@@ -1,0 +1,31 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: packages/*/package-lock.json
+      - run: npm ci --prefix packages/react
+      - run: npm run test:run --prefix packages/react
+      - run: npm run build --prefix packages/react
+      - run: npm pack ./packages/react --pack-destination .
+      - run: npm ci --prefix packages/react-native
+      - run: npm run build --prefix packages/react-native
+      - run: npm pack ./packages/react-native --dry-run
+      - uses: actions/upload-artifact@v4
+        with:
+          name: react-sdk-package
+          path: casperid-react-2.0.2.tgz
