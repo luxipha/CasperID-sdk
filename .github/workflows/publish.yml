@@ -26,6 +26,7 @@ jobs:
         with:
           node-version: '24'
           registry-url: https://registry.npmjs.org
+      - run: npm install --global npm@11.6.1
       - run: npm ci
       - if: inputs.package == 'react'
         run: npm run test:run
